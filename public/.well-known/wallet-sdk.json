@@ -1,0 +1,6 @@
+{
+  "vendor": "Coinbase",
+  "name": "Coinbase Wallet SDK",
+  "js": "https://www.walletlink.org/sdk/js/v3/walletlink.js",
+  "chains": ["eip155:102031", "eip155:102030"]
+}
