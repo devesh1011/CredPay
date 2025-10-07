@@ -7,20 +7,20 @@ const walletSchema = v.object({
   userId: v.string(), // User's wallet address (external wallet)
   walletId: v.string(), // Custodial wallet ID
   address: v.string(), // Custodial wallet address
-  
+
   // Encrypted private key data - NEVER store unencrypted!
   encryptedKey: v.string(),
   salt: v.string(),
   iv: v.string(),
   authTag: v.string(),
   keyHash: v.string(), // For verification
-  
+
   // Metadata
   type: v.union(v.literal("generated"), v.literal("imported")),
   label: v.optional(v.string()),
   createdAt: v.number(),
   lastUsed: v.optional(v.number()),
-  
+
   // AI Access Controls
   aiAccess: v.object({
     enabled: v.boolean(),
@@ -34,7 +34,7 @@ const walletSchema = v.object({
     spentToday: v.optional(v.string()),
     lastReset: v.optional(v.number()),
   }),
-  
+
   // Security metadata
   lastPasswordChange: v.optional(v.number()),
   failedUnlockAttempts: v.number(),
@@ -60,52 +60,60 @@ export const storeWallet = mutation({
     // Get user's username
     const user = await ctx.db
       .query("users")
-      .withIndex("by_wallet", (q) => q.eq("walletAddress", args.userId.toLowerCase()))
+      .withIndex("by_wallet", (q) =>
+        q.eq("walletAddress", args.userId.toLowerCase())
+      )
       .first();
-    
+
     if (!user || !user.username) {
       throw new Error("Please set up your username first");
     }
-    
+
     // Check if user already has maximum wallets (e.g., 5)
     const existingWallets = await ctx.db
       .query("custodialWallets")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
-    
+
     if (existingWallets.length >= 5) {
       throw new Error("Maximum number of custodial wallets reached (5)");
     }
-    
+
     // Validate wallet name uniqueness if provided
     let fullWalletName: string | undefined;
     if (args.walletName) {
       // Clean the wallet name
-      const cleanName = args.walletName.toLowerCase().replace(/[^a-z0-9-]/g, '');
+      const cleanName = args.walletName
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "");
       if (cleanName.length < 1 || cleanName.length > 20) {
-        throw new Error("Wallet name must be 1-20 characters (letters, numbers, hyphens)");
+        throw new Error(
+          "Wallet name must be 1-20 characters (letters, numbers, hyphens)"
+        );
       }
-      
+
       // Create full wallet name: username.walletname
       fullWalletName = `${user.username}.${cleanName}`;
-      
+
       // Check if this wallet name already exists for this user
-      const existingWithName = existingWallets.find(w => w.fullWalletName === fullWalletName);
+      const existingWithName = existingWallets.find(
+        (w) => w.fullWalletName === fullWalletName
+      );
       if (existingWithName) {
         throw new Error(`Wallet name '${cleanName}' already exists`);
       }
     }
-    
+
     // Check for duplicate addresses
     const duplicateAddress = await ctx.db
       .query("custodialWallets")
       .withIndex("by_address", (q) => q.eq("address", args.address))
       .first();
-    
+
     if (duplicateAddress) {
       throw new Error("Wallet with this address already exists");
     }
-    
+
     // Store encrypted wallet
     const walletId = await ctx.db.insert("custodialWallets", {
       userId: args.userId,
@@ -128,7 +136,7 @@ export const storeWallet = mutation({
       failedUnlockAttempts: 0,
       isLocked: false,
     });
-    
+
     // Log wallet creation (without sensitive data)
     await ctx.db.insert("walletLogs", {
       userId: args.userId,
@@ -140,7 +148,7 @@ export const storeWallet = mutation({
         address: args.address,
       },
     });
-    
+
     return walletId;
   },
 });
@@ -155,9 +163,9 @@ export const getUserWallets = query({
       .query("custodialWallets")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
-    
+
     // Return wallet info without sensitive encryption data
-    return wallets.map(wallet => ({
+    return wallets.map((wallet) => ({
       id: wallet._id,
       walletId: wallet.walletId,
       address: wallet.address,
@@ -185,16 +193,16 @@ export const getEncryptedWallet = query({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .filter((q) => q.eq(q.field("walletId"), args.walletId))
       .first();
-    
+
     if (!wallet) {
       throw new Error("Wallet not found");
     }
-    
+
     // Check if wallet is locked
     if (wallet.isLocked) {
       throw new Error("Wallet is locked due to too many failed attempts");
     }
-    
+
     // Return encrypted data for client-side decryption
     return {
       walletId: wallet.walletId,
@@ -235,11 +243,11 @@ export const updateAIAccess = mutation({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .filter((q) => q.eq(q.field("walletId"), args.walletId))
       .first();
-    
+
     if (!wallet) {
       throw new Error("Wallet not found");
     }
-    
+
     // Update AI access settings
     await ctx.db.patch(wallet._id, {
       aiAccess: {
@@ -250,7 +258,7 @@ export const updateAIAccess = mutation({
         lastReset: Date.now(),
       },
     });
-    
+
     // Log the change
     await ctx.db.insert("walletLogs", {
       userId: args.userId,
@@ -263,7 +271,7 @@ export const updateAIAccess = mutation({
         dailyLimit: args.dailyLimit,
       },
     });
-    
+
     return { success: true };
   },
 });
@@ -280,19 +288,19 @@ export const recordFailedUnlock = mutation({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .filter((q) => q.eq(q.field("walletId"), args.walletId))
       .first();
-    
+
     if (!wallet) {
       throw new Error("Wallet not found");
     }
-    
+
     const newAttempts = wallet.failedUnlockAttempts + 1;
     const isLocked = newAttempts >= 5; // Lock after 5 failed attempts
-    
+
     await ctx.db.patch(wallet._id, {
       failedUnlockAttempts: newAttempts,
       isLocked,
     });
-    
+
     // Log the failed attempt
     await ctx.db.insert("walletLogs", {
       userId: args.userId,
@@ -304,11 +312,13 @@ export const recordFailedUnlock = mutation({
         locked: isLocked,
       },
     });
-    
+
     if (isLocked) {
-      throw new Error("Wallet locked after 5 failed attempts. Contact support.");
+      throw new Error(
+        "Wallet locked after 5 failed attempts. Contact support."
+      );
     }
-    
+
     return {
       attemptsRemaining: 5 - newAttempts,
       isLocked,
@@ -328,16 +338,16 @@ export const resetFailedAttempts = mutation({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .filter((q) => q.eq(q.field("walletId"), args.walletId))
       .first();
-    
+
     if (!wallet) {
       throw new Error("Wallet not found");
     }
-    
+
     await ctx.db.patch(wallet._id, {
       failedUnlockAttempts: 0,
       lastUsed: Date.now(),
     });
-    
+
     return { success: true };
   },
 });
@@ -354,20 +364,20 @@ export const deleteWallet = mutation({
     if (args.verificationCode.length < 6) {
       throw new Error("Invalid verification code");
     }
-    
+
     const wallet = await ctx.db
       .query("custodialWallets")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .filter((q) => q.eq(q.field("walletId"), args.walletId))
       .first();
-    
+
     if (!wallet) {
       throw new Error("Wallet not found");
     }
-    
+
     // Delete the wallet
     await ctx.db.delete(wallet._id);
-    
+
     // Log the deletion
     await ctx.db.insert("walletLogs", {
       userId: args.userId,
@@ -378,7 +388,7 @@ export const deleteWallet = mutation({
         address: wallet.address,
       },
     });
-    
+
     return { success: true };
   },
 });
@@ -394,15 +404,24 @@ export const getWalletLogs = query({
     let query = ctx.db
       .query("walletLogs")
       .withIndex("by_user", (q) => q.eq("userId", args.userId));
-    
+
     if (args.walletId) {
       query = query.filter((q) => q.eq(q.field("walletId"), args.walletId));
     }
-    
-    const logs = await query
-      .order("desc")
-      .take(args.limit || 50);
-    
+
+    const logs = await query.order("desc").take(args.limit || 50);
+
     return logs;
+  },
+});
+
+export const resolveUsername = query({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", args.username))
+      .unique();
+    return user ? user.walletAddress : null;
   },
 });
