@@ -11,32 +11,14 @@ import {
   ArrowsClockwise,
   Pulse,
   Wallet,
-  CurrencyCircleDollar,
   Cpu,
   Atom,
   CircleNotch,
 } from "@phosphor-icons/react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
+
 import { cn } from "@/lib/utils";
-import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
+
 import { getExplorerUrl } from "@/lib/creditcoin/config";
-import { LottieAnimation } from "../animations/LottieAnimation";
-import Payment from "../../../public/Payment.json";
 
 import {
   useSendTransaction,
@@ -44,6 +26,7 @@ import {
   useAccount,
 } from "wagmi";
 import { parseEther } from "viem";
+import { toast } from "sonner";
 
 interface PaymentAgentProps {
   address: string;
@@ -366,12 +349,12 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 border border-green-200">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#333] border border-[#444]">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
             </span>
-            <span className="text-xs font-medium text-green-900">Online</span>
+            <span className="text-xs font-medium text-white">Online</span>
           </div>
         </div>
 
@@ -382,7 +365,7 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
             return (
               <div
                 key={index}
-                className="p-3 rounded-lg bg-orange-50 border border-orange-200"
+                className="p-3 rounded-lg bg-gray-50 border border-gray-200"
               >
                 <Icon
                   weight="duotone"
@@ -478,7 +461,7 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
                     className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-white rounded-lg shadow-md border border-border"
                   >
                     {copiedId === message.id ? (
-                      <CheckCircle
+                      <CheckCircleIcon
                         weight="fill"
                         size={14}
                         className="text-success"
@@ -584,7 +567,7 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
                   key={index}
                   type="button"
                   onClick={() => handleSuggestionClick(prompt)}
-                  className="px-3 py-1.5 text-xs bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 hover:border-primary transition-colors"
+                  className="px-3 py-1.5 text-xs bg-[#333] border border-[#444] text-white rounded-lg hover:bg-[#444] hover:border-[#555] transition-colors"
                 >
                   {prompt}
                 </button>

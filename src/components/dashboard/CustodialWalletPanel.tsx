@@ -15,7 +15,7 @@ import {
   EyeSlash,
   Robot,
   Warning,
-  CheckCircleIcon,
+  CheckCircle,
   Copy,
   Trash,
   Gear,
@@ -119,7 +119,14 @@ export function CustodialWalletPanel() {
       setWalletLabel("");
       setWalletName("");
     } catch (error: any) {
-      toast.error(error.message || "Failed to create wallet");
+      if (
+        error.message &&
+        error.message.includes("Please set up your username first")
+      ) {
+        toast.error("Please set up your username before creating a wallet.");
+      } else {
+        toast.error(error.message || "Failed to create wallet");
+      }
     } finally {
       setIsCreating(false);
     }
@@ -187,7 +194,14 @@ export function CustodialWalletPanel() {
       setWalletLabel("");
       setWalletName("");
     } catch (error: any) {
-      toast.error(error.message || "Failed to import wallet");
+      if (
+        error.message &&
+        error.message.includes("Please set up your username first")
+      ) {
+        toast.error("Please set up your username before importing a wallet.");
+      } else {
+        toast.error(error.message || "Failed to import wallet");
+      }
     } finally {
       setIsCreating(false);
     }

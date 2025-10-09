@@ -159,7 +159,7 @@ export function UsernameManager() {
             </div>
             <button
               onClick={handleStartEdit}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-orange-50 hover:bg-orange-100 text-primary rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[#333] hover:bg-[#444] text-white rounded-lg transition-colors"
             >
               <PencilSimpleIcon weight="regular" size={16} />
               Change
@@ -228,7 +228,7 @@ export function UsernameManager() {
               <button
                 onClick={handleSaveUsername}
                 disabled={!checkAvailability?.available}
-                className="px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground transition-colors"
+                className="px-3 py-1.5 text-sm bg-[#333] text-white rounded-lg hover:bg-[#444] disabled:bg-muted disabled:text-muted-foreground transition-colors"
               >
                 Save Username
               </button>
@@ -277,14 +277,14 @@ export function UsernameManager() {
       </div>
 
       {/* Warning */}
-      <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+      <div className="p-3 bg-gray-50 border border-[#333]-200 rounded-lg">
         <div className="flex items-start gap-2">
           <WarningIcon
             weight="duotone"
             size={16}
-            className="text-orange-600 mt-0.5"
+            className="text-white-600 mt-0.5"
           />
-          <p className="text-xs text-orange-900">
+          <p className="text-xs text-gray-900">
             <strong>Important:</strong> Usernames are unique across the entire
             network. Once changed, your old username becomes available for
             others to claim.
