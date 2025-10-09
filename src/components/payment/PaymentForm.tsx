@@ -8,7 +8,7 @@ import {
   useSwitchChain,
 } from "wagmi";
 import { parseEther } from "viem";
-import { useConvex } from "convex/react";
+import { useConvex, useQuery } from "convex/react";
 import { toast } from "sonner";
 import { PaperPlaneTilt, CircleNotch, Warning } from "@phosphor-icons/react";
 import {
@@ -18,6 +18,7 @@ import {
 } from "@/lib/creditcoin/config";
 import { isValidCreditcoinAddress, cn } from "@/lib/utils";
 import { PaymentSuccess } from "./PaymentSuccess";
+import { api } from "@/../convex/_generated/api";
 
 interface PaymentFormProps {
   recipientAddress?: string;
@@ -36,10 +37,15 @@ export function PaymentForm({
   const { switchChain } = useSwitchChain();
 
   const [recipient, setRecipient] = useState(recipientAddress);
-  const [amount, setAmount] = useState(defaultAmount || "0.1");
+  const [amount, setAmount] = useState(defaultAmount || "");
   const [customAmount, setCustomAmount] = useState("");
   const [mounted, setMounted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const resolvedAddress = useQuery(
+    api.wallets.resolveUsername,
+    !isValidCreditcoinAddress(recipient) ? { username: recipient } : "skip"
+  );
 
   const {
     data: hash,
@@ -88,12 +94,22 @@ export function PaymentForm({
       return;
     }
 
+    let finalRecipient = recipient;
     if (!isValidCreditcoinAddress(recipient)) {
-      toast.error("Please enter a valid Creditcoin  address");
+      if (resolvedAddress) {
+        finalRecipient = resolvedAddress;
+      } else {
+        toast.error("Invalid username or address. Please check and try again.");
+        return;
+      }
+    }
+
+    if (!isValidCreditcoinAddress(finalRecipient)) {
+      toast.error("Please enter a valid Creditcoin address or username");
       return;
     }
 
-    const paymentAmount = customAmount || amount;
+    const paymentAmount = amount;
     if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
@@ -112,13 +128,12 @@ export function PaymentForm({
       return;
     }
 
-    await handleSend();
+    await handleSend(finalRecipient, paymentAmount);
   };
 
-  const handleSend = async () => {
-    const paymentAmount = customAmount || amount;
+  const handleSend = async (finalRecipient: string, paymentAmount: string) => {
     sendTransaction({
-      to: recipient as `0x${string}`,
+      to: finalRecipient as `0x${string}`,
       value: parseEther(paymentAmount),
       data: undefined, // Explicitly set data to undefined
     });
@@ -148,11 +163,11 @@ export function PaymentForm({
         {showRecipientInput && (
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">
-              Recipient Address
+              Recipient Address or Username
             </label>
             <input
               type="text"
-              placeholder="0x..."
+              placeholder="0x... or username"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               className="w-full px-4 py-3 rounded-lg bg-card border border-border focus:outline-none focus:border-primary transition-colors"
@@ -175,11 +190,10 @@ export function PaymentForm({
                 type="button"
                 onClick={() => {
                   setAmount(preset.value);
-                  setCustomAmount("");
                 }}
                 className={cn(
                   "flex flex-col items-center justify-center p-3 rounded-lg border transition-colors",
-                  amount === preset.value && !customAmount
+                  amount === preset.value
                     ? "bg-primary/10 border-primary"
                     : "bg-card hover:bg-muted"
                 )}
@@ -197,10 +211,9 @@ export function PaymentForm({
             type="number"
             step="any"
             placeholder="Or enter custom amount"
-            value={customAmount}
+            value={amount}
             onChange={(e) => {
-              setCustomAmount(e.target.value);
-              setAmount("");
+              setAmount(e.target.value);
             }}
             className="w-full px-4 py-3 rounded-lg bg-card border border-border focus:outline-none focus:border-primary transition-colors"
           />
@@ -210,7 +223,7 @@ export function PaymentForm({
         <button
           type="submit"
           disabled={isLoading || !mounted || !address}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-[#333] text-white font-semibold hover:bg-[#444] disabled:bg-gray-600 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? (
             <>
@@ -238,7 +251,7 @@ export function PaymentForm({
       {showSuccessModal && hash && (
         <PaymentSuccess
           hash={hash}
-          amount={customAmount || amount}
+          amount={amount}
           recipient={recipient}
           onClose={() => setShowSuccessModal(false)}
         />

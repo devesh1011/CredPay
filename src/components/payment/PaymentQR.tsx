@@ -5,9 +5,12 @@ import QRCode from "react-qr-code";
 import { Share2, Download, Copy, CheckCircleIcon, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { generatePaymentUrl, copyToClipboard } from "@/lib/utils";
+import { api } from "@/../convex/_generated/api";
+import { useConvex, useQuery } from "convex/react";
 
 interface PaymentQRProps {
   address: string;
+  username?: string | null;
   recipientName?: string;
   amount?: string;
 }
@@ -17,17 +20,36 @@ export function PaymentQR({
   recipientName = "User",
   amount,
 }: PaymentQRProps) {
-  const [copied, setCopied] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedUsername, setCopiedUsername] = useState(false);
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
-  const paymentUrl = generatePaymentUrl(address, amount);
+  const username = useQuery(
+    api.users.getUsernameByAddress,
+    address ? { address } : "skip"
+  );
 
-  const handleCopy = async () => {
-    const success = await copyToClipboard(paymentUrl);
+  const paymentUrl = generatePaymentUrl(username || address, amount);
+  const addressPaymentUrl = generatePaymentUrl(address, amount);
+  const usernamePaymentUrl = username
+    ? generatePaymentUrl(username, amount)
+    : null;
+
+  const handleCopy = async (
+    urlToCopy: string,
+    type: "address" | "username"
+  ) => {
+    const success = await copyToClipboard(urlToCopy);
     if (success) {
-      setCopied(true);
-      toast.success("Payment link copied!");
-      setTimeout(() => setCopied(false), 2000);
+      if (type === "address") {
+        setCopiedAddress(true);
+        toast.success("Address link copied!");
+        setTimeout(() => setCopiedAddress(false), 2000);
+      } else {
+        setCopiedUsername(true);
+        toast.success("Username link copied!");
+        setTimeout(() => setCopiedUsername(false), 2000);
+      }
     } else {
       toast.error("Failed to copy link");
     }
@@ -89,11 +111,11 @@ export function PaymentQR({
       } catch (error) {
         // User cancelled or error
         if ((error as Error).name !== "AbortError") {
-          handleCopy();
+          handleCopy(paymentUrl, username ? "username" : "address");
         }
       }
     } else {
-      handleCopy();
+      handleCopy(paymentUrl, username ? "username" : "address");
     }
   };
 
@@ -131,21 +153,21 @@ export function PaymentQR({
       {/* Payment URL */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">
-          Payment Link
+          Payment Link (Address)
         </label>
         <div className="flex items-center gap-2">
           <input
             type="text"
-            value={paymentUrl}
+            value={addressPaymentUrl}
             readOnly
             className="flex-1 px-3 py-2 text-sm rounded-lg bg-card border border-border focus:outline-none focus:border-primary"
           />
           <button
-            onClick={handleCopy}
+            onClick={() => handleCopy(addressPaymentUrl, "address")}
             className="p-2 rounded-lg bg-card border border-border hover:border-primary transition-colors"
             title="Copy link"
           >
-            {copied ? (
+            {copiedAddress ? (
               <CheckCircleIcon className="h-4 w-4 text-green-500" />
             ) : (
               <Copy className="h-4 w-4 text-primary" />
@@ -153,6 +175,34 @@ export function PaymentQR({
           </button>
         </div>
       </div>
+
+      {/* Username Payment URL */}
+      {usernamePaymentUrl && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">
+            Payment Link (Username)
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={usernamePaymentUrl}
+              readOnly
+              className="flex-1 px-3 py-2 text-sm rounded-lg bg-card border border-border focus:outline-none focus:border-primary"
+            />
+            <button
+              onClick={() => handleCopy(usernamePaymentUrl, "username")}
+              className="p-2 rounded-lg bg-card border border-border hover:border-primary transition-colors"
+              title="Copy username link"
+            >
+              {copiedUsername ? (
+                <CheckCircleIcon className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4 text-primary" />
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-2">
