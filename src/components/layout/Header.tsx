@@ -85,12 +85,11 @@ export function Header() {
                     className={cn(
                       "flex items-center gap-2 px-4 py-2 rounded-lg transition-all",
                       link.href === "/dashboard"
-                        ? "text-primary font-semibold hover:bg-orange-50"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        ? "text-primary font-semibold hover:bg-[#333] hover:text-white"
+                        : "text-muted-foreground hover:text-white hover:bg-[#333]"
                     )}
                   >
-                    <Icon weight="regular" size={18} />
-                    <span className="font-medium">{link.label}</span>
+                    {link.label}
                   </Link>
                 );
               })}
