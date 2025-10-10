@@ -5,7 +5,11 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { PaymentForm } from "@/components/payment/PaymentForm";
-import { ArrowLeft, PaperPlaneTilt, User, Wallet } from "@phosphor-icons/react";
+import {
+  ArrowLeftIcon,
+  PaperPlaneTiltIcon,
+  WalletIcon,
+} from "@phosphor-icons/react";
 import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import { isValidCreditcoinAddress } from "@/lib/utils";
@@ -43,7 +47,7 @@ export default function PayPage({ params }: PayPageProps) {
             href="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8"
           >
-            <ArrowLeft weight="regular" size={20} />
+            <ArrowLeftIcon weight="regular" size={20} />
             <span>Back to Home</span>
           </Link>
 
@@ -63,7 +67,7 @@ export default function PayPage({ params }: PayPageProps) {
               {/* Payment Details */}
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <Wallet
+                  <WalletIcon
                     weight="duotone"
                     size={24}
                     className="text-primary mt-1"
@@ -78,7 +82,7 @@ export default function PayPage({ params }: PayPageProps) {
 
                 {amount && (
                   <div className="flex items-start gap-3">
-                    <PaperPlaneTilt
+                    <PaperPlaneTiltIcon
                       weight="duotone"
                       size={24}
                       className="text-primary mt-1"
