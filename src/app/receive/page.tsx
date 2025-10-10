@@ -6,39 +6,58 @@ import { Header } from "@/components/layout/Header";
 import { PaymentQR } from "@/components/payment/PaymentQR";
 import { WalletButton } from "@/components/wallet/WalletButton";
 import {
-  ArrowLeft,
-  QrCode,
-  Wallet,
-  Copy,
+  ArrowLeftIcon,
+  QrCodeIcon,
+  WalletIcon,
+  CopyIcon,
   CheckCircleIcon,
-  Share,
+  ShareIcon,
 } from "@phosphor-icons/react";
 import { useAccount } from "wagmi";
 import { toast } from "sonner";
-import { CheckCircle2Icon } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/../convex/_generated/api";
 
 export default function ReceivePage() {
   const { address } = useAccount();
   const [amount, setAmount] = useState("");
   const [recipientName, setRecipientName] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  const username = useQuery(
+    api.users.getUsernameByAddress,
+    address ? { address } : "skip"
+  );
+  const [isUsernameLoading, setIsUsernameLoading] = useState(true);
+
+  useEffect(() => {
+    if (username !== undefined) {
+      setIsUsernameLoading(false);
+    }
+  }, [username]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const copyAddress = () => {
-    if (address) {
-      navigator.clipboard.writeText(address);
-      setCopied(true);
+  const copyToClipboard = (text: string, type: "address" | "username") => {
+    navigator.clipboard.writeText(text);
+    if (type === "address") {
+      setCopiedAddress(true);
       toast.success("Address copied to clipboard");
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopiedAddress(false), 2000);
+    } else {
+      toast.success("Username link copied to clipboard");
     }
   };
 
   const sharePaymentLink = () => {
-    const paymentUrl = `${window.location.origin}/send?to=${address}${amount ? `&amount=${amount}` : ""}`;
+    const baseUrl = `${window.location.origin}/pay/`;
+    const paymentUrl = username
+      ? `${baseUrl}${username}${amount ? `?amount=${amount}` : ""}`
+      : `${baseUrl}${address}${amount ? `?amount=${amount}` : ""}`;
+
     if (navigator.share) {
       navigator.share({
         title: "CredPay Payment Request",
@@ -61,7 +80,7 @@ export default function ReceivePage() {
             href="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8"
           >
-            <ArrowLeft weight="regular" size={20} />
+            <ArrowLeftIcon weight="regular" size={20} />
             <span>Back to Home</span>
           </Link>
 
@@ -121,36 +140,39 @@ export default function ReceivePage() {
                     </p>
                   </div>
 
-                  {/* Wallet Address */}
-                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-orange-900">
-                        Your Wallet Address
-                      </span>
-                      <button
-                        onClick={copyAddress}
-                        className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-white border border-orange-200 hover:bg-orange-100 transition-colors"
-                      >
-                        {copied ? (
-                          <>
-                            <CheckCircleIcon
-                              weight="fill"
-                              size={14}
-                              className="text-success"
-                            />
-                            <span>Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy weight="regular" size={14} />
-                            <span>Copy</span>
-                          </>
-                        )}
-                      </button>
+                  {/* Payment Links */}
+                  <div className="space-y-3">
+                    {/* Address Link */}
+                    <div className="bg-[#333] border border-[#444] rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-white">
+                          Your Wallet Address
+                        </span>
+                        <button
+                          onClick={() => copyToClipboard(address!, "address")}
+                          className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-[#444] border border-[#555] text-white hover:bg-[#555] transition-colors"
+                        >
+                          {copiedAddress ? (
+                            <>
+                              <CheckCircleIcon
+                                weight="fill"
+                                size={14}
+                                className="text-green-400"
+                              />
+                              <span>Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <CopyIcon weight="regular" size={14} />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <code className="text-xs font-mono text-gray-300 break-all">
+                        {address}
+                      </code>
                     </div>
-                    <code className="text-xs font-mono text-orange-800 break-all">
-                      {address}
-                    </code>
                   </div>
 
                   {/* Share Button */}
@@ -158,7 +180,7 @@ export default function ReceivePage() {
                     onClick={sharePaymentLink}
                     className="w-full px-6 py-3 rounded-xl gradient-primary text-white font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2"
                   >
-                    <Share weight="regular" size={20} />
+                    <ShareIcon weight="regular" size={20} />
                     Share Payment Link
                   </button>
                 </div>
@@ -177,7 +199,7 @@ export default function ReceivePage() {
               {mounted && address ? (
                 <div className="bg-white rounded-2xl shadow-xl border border-border p-6">
                   <div className="flex items-center gap-2 mb-6">
-                    <QrCode
+                    <QrCodeIcon
                       weight="regular"
                       size={24}
                       className="text-primary"
@@ -185,15 +207,18 @@ export default function ReceivePage() {
                     <h2 className="text-2xl font-bold">Payment QR Code</h2>
                   </div>
 
-                  <PaymentQR
-                    address={address}
-                    recipientName={recipientName || "Your Wallet"}
-                    amount={amount || undefined}
-                  />
+                  {!isUsernameLoading && (
+                    <PaymentQR
+                      address={address}
+                      username={username}
+                      recipientName={recipientName || "Your Wallet"}
+                      amount={amount || undefined}
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl shadow-xl border border-border p-12 text-center">
-                  <Wallet
+                  <WalletIcon
                     weight="light"
                     size={64}
                     className="mx-auto mb-4 text-muted-foreground"
