@@ -5,11 +5,11 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { PaymentForm } from "@/components/payment/PaymentForm";
 import {
-  ArrowLeft,
-  PaperPlaneTilt,
-  Lightning,
-  Shield,
-  Clock,
+  ArrowLeftIcon,
+  PaperPlaneTiltIcon,
+  LightningIcon,
+  ShieldIcon,
+  ClockIcon,
 } from "@phosphor-icons/react";
 
 export default function SendPage() {
@@ -23,7 +23,7 @@ export default function SendPage() {
             href="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8"
           >
-            <ArrowLeft weight="regular" size={20} />
+            <ArrowLeftIcon weight="regular" size={20} />
             <span>Back to Home</span>
           </Link>
 
@@ -43,15 +43,15 @@ export default function SendPage() {
               {/* Features */}
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <Lightning
+                  <LightningIcon
                     weight="duotone"
                     size={24}
                     className="text-primary mt-1"
                   />
                   <div>
-                    <h3 className="font-semibold mb-1">Lightning Fast</h3>
+                    <h3 className="font-semibold mb-1">LightningIcon Fast</h3>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Shield
+                      <ShieldIcon
                         weight="duotone"
                         size={24}
                         className="text-primary mt-1"
@@ -65,7 +65,7 @@ export default function SendPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Shield
+                  <ShieldIcon
                     weight="duotone"
                     size={24}
                     className="text-primary mt-1"
@@ -80,7 +80,7 @@ export default function SendPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Clock
+                  <ClockIcon
                     weight="duotone"
                     size={24}
                     className="text-primary mt-1"
@@ -96,8 +96,8 @@ export default function SendPage() {
               </div>
 
               {/* Info Box */}
-              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <p className="text-sm text-orange-900">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p className="text-sm text-gray-900">
                   <strong>Tip:</strong> You can save frequently used addresses
                   by adding a recipient name. This makes future payments even
                   faster!
@@ -109,7 +109,7 @@ export default function SendPage() {
             <div className="lg:sticky lg:top-24">
               <div className="bg-white rounded-2xl shadow-xl border border-border p-6">
                 <div className="flex items-center gap-2 mb-6">
-                  <PaperPlaneTilt
+                  <PaperPlaneTiltIcon
                     weight="regular"
                     size={24}
                     className="text-primary"
