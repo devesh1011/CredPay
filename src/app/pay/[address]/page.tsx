@@ -6,6 +6,9 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { PaymentForm } from "@/components/payment/PaymentForm";
 import { ArrowLeft, PaperPlaneTilt, User, Wallet } from "@phosphor-icons/react";
+import { useQuery } from "convex/react";
+import { api } from "@/../convex/_generated/api";
+import { isValidCreditcoinAddress } from "@/lib/utils";
 
 interface PayPageProps {
   params: Promise<{
@@ -17,7 +20,18 @@ export default function PayPage({ params }: PayPageProps) {
   const resolvedParams = use(params);
   const searchParams = useSearchParams();
   const amount = searchParams.get("amount") || undefined;
-  const recipientAddress = resolvedParams.address;
+  const recipientIdentifier = resolvedParams.address;
+
+  const isAddress = isValidCreditcoinAddress(recipientIdentifier);
+
+  const resolvedAddress = useQuery(
+    api.wallets.resolveUsername,
+    !isAddress ? { username: recipientIdentifier } : "skip"
+  );
+
+  const recipientAddress = isAddress
+    ? recipientIdentifier
+    : resolvedAddress || "";
 
   return (
     <>
