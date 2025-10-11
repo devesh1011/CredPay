@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Header } from "@/components/layout/Header";
@@ -18,10 +18,24 @@ import {
   ShieldCheckIcon,
 } from "@phosphor-icons/react";
 import { useAccount } from "wagmi";
+import { useQuery } from "convex/react";
+import { api } from "@/../convex/_generated/api";
 
 export default function Home() {
   const { address } = useAccount();
   const [activeTab, setActiveTab] = useState<"send" | "receive">("send");
+
+  const username = useQuery(
+    api.users.getUsernameByAddress,
+    address ? { address } : "skip"
+  );
+  const [isUsernameLoading, setIsUsernameLoading] = useState(true);
+
+  useEffect(() => {
+    if (username !== undefined) {
+      setIsUsernameLoading(false);
+    }
+  }, [username]);
 
   const features = [
     {
@@ -62,12 +76,12 @@ export default function Home() {
               {/* Left Content */}
               <div className="space-y-8">
                 <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-100 border border-orange-200">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 border border-gray-200">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-gray-500"></span>
                     </span>
-                    <span className="text-sm font-medium text-orange-900">
+                    <span className="text-sm font-medium text-black-900">
                       Live on Creditcoin Network
                     </span>
                   </div>
@@ -125,7 +139,7 @@ export default function Home() {
                       onClick={() => setActiveTab("send")}
                       className={`flex-1 px-6 py-4 font-medium transition-all flex items-center justify-center gap-2 ${
                         activeTab === "send"
-                          ? "bg-orange-50 text-primary border-b-2 border-primary"
+                          ? "bg-gray-50 text-primary border-b-2 border-primary"
                           : "text-muted-foreground hover:bg-muted/50"
                       }`}
                     >
@@ -136,7 +150,7 @@ export default function Home() {
                       onClick={() => setActiveTab("receive")}
                       className={`flex-1 px-6 py-4 font-medium transition-all flex items-center justify-center gap-2 ${
                         activeTab === "receive"
-                          ? "bg-orange-50 text-primary border-b-2 border-primary"
+                          ? "bg-gray-50 text-primary border-b-2 border-primary"
                           : "text-muted-foreground hover:bg-muted/50"
                       }`}
                     >
@@ -152,10 +166,13 @@ export default function Home() {
                     ) : (
                       <div className="flex-1 flex items-center justify-center">
                         {address ? (
-                          <PaymentQR
-                            address={address}
-                            recipientName="Your Wallet"
-                          />
+                          !isUsernameLoading && (
+                            <PaymentQR
+                              address={address}
+                              username={username}
+                              recipientName="Your Wallet"
+                            />
+                          )
                         ) : (
                           <div className="text-center space-y-6">
                             <WalletIcon
@@ -225,7 +242,7 @@ export default function Home() {
         </section>
 
         {/* Benefits Section */}
-        <section className="py-20 bg-gradient-to-r from-orange-50 to-red-50">
+        <section className="py-20">
           <div className="container-fluid">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
