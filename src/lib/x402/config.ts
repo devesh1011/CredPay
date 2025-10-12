@@ -119,12 +119,12 @@ export const generatePaymentRequirements = (
 
 // Testnet helpers
 export const TESTNET_RESOURCES = {
-  seiFaucet: "https://atlantic-2.app.sei.io/faucet",
-  seitraceFaucet: "https://seitrace.com/tool/faucet?chain=atlantic-2",
-  usdcBridge: "https://testnet.circle.com/faucets/usdc", // Circle's CCTP for testnet USDC
-  creditcoinFaucet: "https://creditcoin-testnet.faucet.com",
-  creditcoinBlockExplorer: "https://creditcoin-testnet.blockscout.com",
-  documentation: "https://docs.creditcoin.org/",
+  // This would be your own API endpoint in a real application
+  getChallenge: "https://credpay.vercel.app/api/x402/challenge",
+  getQuote: "https://credpay.vercel.app/api/x402/quote",
+  holdToken: "https://credpay.vercel.app/api/x402/hold",
+  // Faucets for testing
+  creditcoinFaucet: "https://faucet.testnet.creditcoin.network",
 };
 
 // Check if we're on testnet

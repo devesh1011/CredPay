@@ -15,7 +15,6 @@ import { ethers } from "ethers";
 import {
   encryptPrivateKey,
   decryptPrivateKey,
-  generateSecurePassword,
   validatePasswordStrength,
   hashData,
 } from "./encryption";
@@ -45,7 +44,7 @@ export interface WalletMetadata {
   aiAccess: {
     enabled: boolean;
     level: AccessLevel;
-    dailyLimit?: string; // In ETH/SEI
+    dailyLimit?: string; // In tCTC
     spentToday?: string;
     lastReset?: Date;
   };
@@ -224,7 +223,7 @@ export async function unlockWallet(
     return new ethers.Wallet(privateKey);
   } catch (error) {
     throw new Error(
-      "Failed to unlock wallet: Invalid password or corrupted data"
+      "Failed to unlock wallet: Invalid password or corrupted data "
     );
   }
 }
@@ -260,7 +259,7 @@ export function updateAIAccess(
 /**
  * Checks if AI agent can perform transaction
  * @param wallet - Wallet to check
- * @param amount - Transaction amount in ETH/SEI
+ * @param amount - Transaction amount in tCTC
  * @returns Whether transaction is allowed
  */
 export function canAITransact(
@@ -319,7 +318,7 @@ export function canAITransact(
     if (spentToday + transactionAmount > dailyLimit) {
       return {
         allowed: false,
-        reason: `Transaction exceeds daily limit. Limit: ${dailyLimit} SEI, Already spent: ${spentToday} SEI`,
+        reason: `Transaction exceeds daily limit. Limit: ${dailyLimit} tCTC, Already spent: ${spentToday} tCTC`,
       };
     }
   }

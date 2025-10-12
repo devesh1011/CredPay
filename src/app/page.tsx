@@ -92,7 +92,7 @@ export default function Home() {
                   </h1>
 
                   <p className="text-xl text-muted-foreground max-w-xl">
-                    The fastest way to send and receive payments on Creditcoin
+                    The easiest way to send and receive payments on Creditcoin
                     Network. No banks, no delays, just instant transfers.
                   </p>
                 </div>
@@ -109,7 +109,9 @@ export default function Home() {
                       size={24}
                       className="text-primary"
                     />
-                    <span className="font-medium">&lt; 1 sec transfers</span>
+                    <span className="font-medium">
+                      &lt; Under 5 sec transfers
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <ShieldCheckIcon
@@ -311,7 +313,7 @@ export default function Home() {
                           CredPay
                         </span>
                         <span className="font-bold text-success">
-                          &lt; 1 second, 0% fee
+                          &lt; 5 second, 0% fee
                         </span>
                       </div>
                     </div>
@@ -382,7 +384,7 @@ export default function Home() {
                   Receive
                 </Link>
                 <a
-                  href="https://docs.sei.io"
+                  href="https://docs.creditcoin.org"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-primary transition-colors"

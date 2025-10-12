@@ -13,21 +13,12 @@ export function formatAddress(address: string, chars = 4): string {
 }
 
 // Format Creditcoinamount
-export function formatSei(value: string | number, decimals = 4): string {
-  const num = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(num)) return "0";
-
-  // For very small numbers, use exponential notation
-  if (num < 0.0001 && num > 0) {
-    return num.toExponential(2);
-  }
-
-  return num.toFixed(decimals).replace(/\.?0+$/, "");
-}
-
-// Format Creditcoin  amount
 export function formatCreditcoin(value: string | number, decimals = 4): string {
-  return formatSei(value, decimals); // Re-use logic for now
+  const number = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(number)) {
+    return "0.00";
+  }
+  return number.toFixed(decimals);
 }
 
 // Copy to clipboard
@@ -69,22 +60,43 @@ export function generatePaymentUrl(address: string, amount?: string): string {
   return url.toString();
 }
 
-// Validate Creditcoinaddress
-export function isValidSeiAddress(address: string): boolean {
-  if (!address) return false;
+/**
+ * =============================================================================
+ * Address validation functions
+ * =============================================================================
+ */
 
-  // Check for 0x prefix and length (42 characters for EVM addresses)
-  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) return false;
-
-  return true;
-}
-
-// Validate Creditcoin  address
 export function isValidCreditcoinAddress(address: string): boolean {
-  return isValidSeiAddress(address); // Re-use logic for now
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
 }
 
-// Debounce function
+/**
+ * @deprecated Use isValidCreditcoinAddress instead
+ */
+export function isValidEthereumAddress(address: string): boolean {
+  return isValidCreditcoinAddress(address); // Re-use logic for now
+}
+
+/**
+ * =============================================================================
+ * Currency formatting functions
+ * =============================================================================
+ */
+
+export function formatCurrency(
+  value: string | number,
+  currency: string,
+  decimals = 4
+): string {
+  return formatCreditcoin(value, decimals); // Re-use logic for now
+}
+
+/**
+ * =============================================================================
+ * Debounce function
+ * =============================================================================
+ */
+
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
@@ -102,7 +114,12 @@ export function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-// Check if mobile device
+/**
+ * =============================================================================
+ * Device detection functions
+ * =============================================================================
+ */
+
 export function isMobile(): boolean {
   if (typeof window === "undefined") return false;
 
@@ -111,7 +128,6 @@ export function isMobile(): boolean {
   );
 }
 
-// Get device type
 export function getDeviceType(): "mobile" | "tablet" | "desktop" {
   if (typeof window === "undefined") return "desktop";
 
