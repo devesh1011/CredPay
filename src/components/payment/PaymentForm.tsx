@@ -8,12 +8,11 @@ import {
   useSwitchChain,
 } from "wagmi";
 import { parseEther } from "viem";
-import { useConvex, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { toast } from "sonner";
 import { PaperPlaneTilt, CircleNotch, Warning } from "@phosphor-icons/react";
 import {
   DEFAULT_PAYMENT_AMOUNTS,
-  TX_STATUS,
   DEFAULT_NETWORK,
 } from "@/lib/creditcoin/config";
 import { isValidCreditcoinAddress, cn } from "@/lib/utils";
@@ -38,7 +37,6 @@ export function PaymentForm({
 
   const [recipient, setRecipient] = useState(recipientAddress);
   const [amount, setAmount] = useState(defaultAmount || "");
-  const [customAmount, setCustomAmount] = useState("");
   const [mounted, setMounted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -70,10 +68,6 @@ export function PaymentForm({
   useEffect(() => {
     if (isSuccess && hash) {
       setShowSuccessModal(true);
-
-      setTimeout(() => {
-        setCustomAmount("");
-      }, 5000);
     }
   }, [isSuccess, hash]);
 
@@ -119,7 +113,7 @@ export function PaymentForm({
       try {
         await switchChain({ chainId: DEFAULT_NETWORK.chainId });
         toast.info(`Switched to ${DEFAULT_NETWORK.chainName}`);
-        setTimeout(() => handleSend(), 500);
+        setTimeout(() => handleSend(finalRecipient, paymentAmount), 500);
       } catch {
         toast.error(
           `Please switch to ${DEFAULT_NETWORK.chainName} to send payments`
