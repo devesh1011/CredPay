@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import Lottie, { LottieRefCurrentProps } from 'lottie-react';
+import { useEffect, useRef } from "react";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
 
 interface LottieAnimationProps {
-  animationData: any;
+  animationData: object;
   loop?: boolean;
   autoplay?: boolean;
   className?: string;
@@ -19,9 +19,9 @@ export function LottieAnimation({
   animationData,
   loop = true,
   autoplay = true,
-  className = '',
-  width = 'auto',
-  height = 'auto',
+  className = "",
+  width = "auto",
+  height = "auto",
   speed = 1,
   onComplete,
   onClick,
@@ -35,18 +35,14 @@ export function LottieAnimation({
   }, [speed]);
 
   return (
-    <div 
-      className={className}
-      style={{ width, height }}
-      onClick={onClick}
-    >
+    <div className={className} style={{ width, height }} onClick={onClick}>
       <Lottie
         lottieRef={lottieRef}
         animationData={animationData}
         loop={loop}
         autoplay={autoplay}
         onComplete={onComplete}
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: "100%", height: "100%" }}
       />
     </div>
   );
