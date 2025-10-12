@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { PaymentForm } from "@/components/payment/PaymentForm";
@@ -57,8 +56,8 @@ export default function SendPage() {
                         className="text-primary mt-1"
                       />
                       <span>
-                        Transactions confirm in under 1 second with Creditcoin's
-                        15s finality
+                        Transactions confirm in under 1 second with
+                        Creditcoin`&apos;`s 15s finality
                       </span>
                     </div>
                   </div>
