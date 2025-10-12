@@ -114,7 +114,7 @@ export default function SendPage() {
                     size={24}
                     className="text-primary"
                   />
-                  <h2 className="text-2xl font-bold">Send SEI</h2>
+                  <h2 className="text-2xl font-bold">Send tCTC</h2>
                 </div>
 
                 <PaymentForm showRecipientInput />
