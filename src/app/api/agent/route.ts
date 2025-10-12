@@ -4,8 +4,9 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { createToolCallingAgent } from "langchain/agents";
 import { TavilySearch } from "@langchain/tavily";
 import { AgentExecutor } from "langchain/agents";
-import { CreditcoinAgent } from "../../../../creditcoin-agent-kit/src";
-import { getCreditcoinTools } from "../../../../creditcoin-agent-kit/src/langchain";
+
+import { CreditcoinAgent } from "creditcoin-agent-kit";
+import { getCreditcoinTools } from "creditcoin-agent-kit/dist/langchain";
 
 export async function POST(req: NextRequest) {
   try {
