@@ -4,8 +4,7 @@ import { useState } from "react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-// @ts-ignore
+
 import "@rainbow-me/rainbowkit/styles.css";
 
 import { ConvexProvider, ConvexReactClient } from "convex/react";
