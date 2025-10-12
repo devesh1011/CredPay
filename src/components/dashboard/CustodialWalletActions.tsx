@@ -79,7 +79,7 @@ export function CustodialWalletActions({
 
       // Create ethers wallet with provider
       const provider = new ethers.JsonRpcProvider(
-        "https://evm-rpc-testnet.sei-apis.com"
+        "https://rpc.testnet.creditcoin.network"
       );
       const ethersWallet = new ethers.Wallet(privateKey, provider);
 
@@ -96,8 +96,8 @@ export function CustodialWalletActions({
 
       // Check balance
       const balance = await provider.getBalance(ethersWallet.address);
-      const balanceInSei = ethers.formatEther(balance);
-      console.log("Wallet balance:", balanceInSei, "SEI");
+      const balanceInCTC = ethers.formatEther(balance);
+      console.log("Wallet balance:", balanceInCTC, "tCTC");
     } catch (error: any) {
       console.error("Unlock error:", error);
 
@@ -152,12 +152,12 @@ export function CustodialWalletActions({
 
       // Check balance
       const balance = await provider.getBalance(decryptedWallet.address);
-      const balanceInSei = parseFloat(ethers.formatEther(balance));
+      const balanceInCTC = parseFloat(ethers.formatEther(balance));
       const amountToSend = parseFloat(amount);
 
-      if (amountToSend > balanceInSei) {
+      if (amountToSend > balanceInCTC) {
         toast.error(
-          `Insufficient balance. Available: ${balanceInSei.toFixed(4)} SEI`
+          `Insufficient balance. Available: ${balanceInCTC.toFixed(4)} tCTC`
         );
         return;
       }
@@ -169,9 +169,9 @@ export function CustodialWalletActions({
         ethers.formatEther(gasLimit * (gasPrice.gasPrice || BigInt(0)))
       );
 
-      if (amountToSend + estimatedGas > balanceInSei) {
+      if (amountToSend + estimatedGas > balanceInCTC) {
         toast.error(
-          `Insufficient balance for gas. Need: ${(amountToSend + estimatedGas).toFixed(4)} SEI`
+          `Insufficient balance for gas. Need: ${(amountToSend + estimatedGas).toFixed(4)} tCTC`
         );
         return;
       }
@@ -204,7 +204,7 @@ export function CustodialWalletActions({
           fromAddress: decryptedWallet.address.toLowerCase(),
           toAddress: recipientAddress.toLowerCase(),
           amount: amount,
-          currency: "SEI",
+          currency: "tCTC",
           txHash: tx.hash,
           status: "confirmed",
           message: `Sent from custodial wallet: ${wallet.fullWalletName || wallet.walletName}`,
@@ -327,7 +327,7 @@ export function CustodialWalletActions({
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Amount (SEI)
+                  Amount (tCTC)
                 </label>
                 <input
                   type="number"
@@ -350,7 +350,7 @@ export function CustodialWalletActions({
                     disabled={isSending}
                     className="flex-1 py-1 px-2 text-sm border rounded hover:bg-gray-50"
                   >
-                    {preset} SEI
+                    {preset} tCTC
                   </button>
                 ))}
               </div>

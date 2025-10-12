@@ -13,19 +13,8 @@ import {
   Wallet,
   Cpu,
   Atom,
-  CircleNotch,
 } from "@phosphor-icons/react";
-
 import { cn } from "@/lib/utils";
-
-import { getExplorerUrl } from "@/lib/creditcoin/config";
-
-import {
-  useSendTransaction,
-  useWaitForTransactionReceipt,
-  useAccount,
-} from "wagmi";
-import { parseEther } from "viem";
 import { toast } from "sonner";
 
 interface PaymentAgentProps {
@@ -34,64 +23,36 @@ interface PaymentAgentProps {
 
 interface Message {
   id: string;
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant";
   content: string;
-  timestamp: Date;
-  suggestions?: string[];
-  transactionData?: {
-    to?: string;
-    amount?: string;
-    message?: string;
-  };
 }
 
 const EXAMPLE_PROMPTS = [
-  "Send 10 Creditcointo alice.sei",
-  "What's my wallet balance?",
-  "Generate a payment QR code",
-  "Split 50 Creditcoinbetween 3 wallets",
-  "Schedule a recurring payment",
-  "Check transaction status",
+  "Send 0.01 tCTC to 0x...",
+  "What is the agent's wallet address?",
+  "What is the agent's balance?",
 ];
 
 const CAPABILITIES = [
   {
     icon: Pulse,
-    label: "Instant Transfers",
-    description: "Send Creditcoinin under 1 second",
+    label: "Autonomous Transactions",
+    description: "Send payments on your behalf",
   },
   {
     icon: Wallet,
-    label: "Balance Checks",
-    description: "View wallet balances and history",
+    label: "Wallet Management",
+    description: "Check its own balance and address",
   },
   {
     icon: Atom,
-    label: "Smart Payments",
-    description: "Split bills and batch transfers",
+    label: "Complex Tasks",
+    description: "Understands natural language",
   },
 ];
 
 export function PaymentAgent({ address }: PaymentAgentProps) {
-  const { isConnected } = useAccount();
-  const {
-    sendTransaction,
-    data: hash,
-    isPending: isSending,
-  } = useSendTransaction();
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({ hash });
-
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "system",
-      content:
-        "Hello! I'm your AI Payment Assistant. I can help you send payments, check balances, and manage transactions on Creditcoin Network. How can I assist you today?",
-      timestamp: new Date(),
-      suggestions: EXAMPLE_PROMPTS.slice(0, 3),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -101,19 +62,6 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  useEffect(() => {
-    if (isConfirmed && hash) {
-      toast.success("Transaction confirmed!");
-      const confirmMsg: Message = {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: `✅ Transaction confirmed!\n\nView on explorer: ${getExplorerUrl(hash, "tx")}`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, confirmMsg]);
-    }
-  }, [isConfirmed, hash]);
 
   const handleCopy = (text: string, messageId: string) => {
     navigator.clipboard.writeText(text);
@@ -127,195 +75,53 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
     inputRef.current?.focus();
   };
 
-  const executeTransaction = async (transactionData: {
-    to?: string;
-    amount?: string;
-    message?: string;
-  }) => {
-    if (!isConnected) {
-      toast.error("Please connect your wallet first");
-      return;
-    }
-
-    if (!transactionData.to || !transactionData.amount) {
-      toast.error("Missing transaction details");
-      return;
-    }
-
-    // Validate the address format
-    if (!transactionData.to.match(/^0x[a-fA-F0-9]{40}$/)) {
-      toast.error("Invalid recipient address format");
-      return;
-    }
-
-    try {
-      // Send the transaction
-      await sendTransaction({
-        to: transactionData.to as `0x${string}`,
-        value: parseEther(transactionData.amount),
-      });
-
-      toast.success("Transaction sent! Waiting for confirmation...");
-
-      // Add a confirmation message
-      const confirmMsg: Message = {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: `✨ Transaction submitted!\n\nThe transaction is being processed. You'll receive a confirmation once it's complete.`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, confirmMsg]);
-    } catch (error: any) {
-      console.error("Transaction error:", error);
-      toast.error(error.message || "Transaction failed");
-
-      const errorMsg: Message = {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: `❌ Transaction failed: ${error.message || "Unknown error"}`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-    }
-  };
-
   const processMessage = async (userMessage: string) => {
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
       content: userMessage,
-      timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setIsProcessing(true);
 
-    // Simulate AI processing
-    setTimeout(() => {
-      let response: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
-      };
+    try {
+      const response = await fetch("/api/agent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          input: userMessage,
+          chatHistory: messages,
+        }),
+      });
 
-      // Parse common payment intents
-      const lowerMessage = userMessage.toLowerCase();
-
-      if (
-        lowerMessage.includes("send") &&
-        (lowerMessage.includes("sei") || lowerMessage.includes("to"))
-      ) {
-        // Extract amount and recipient
-        const amountMatch = userMessage.match(/(\d+(?:\.\d+)?)\s*sei/i);
-        const toMatch = userMessage.match(
-          /to\s+([a-zA-Z0-9._-]+(?:\.sei)?|0x[a-fA-F0-9]{40})/i
-        );
-
-        if (amountMatch && toMatch) {
-          let recipientAddress = toMatch[1];
-
-          // Check if it's a username (not an ethereum address)
-          if (!recipientAddress.startsWith("0x")) {
-            // For now, use a test address for usernames
-            // In production, this would resolve via your username system
-            recipientAddress = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb5"; // Example test address
-            response.content = `I'll help you send ${amountMatch[1]} Creditcointo ${toMatch[1]} (resolved to ${recipientAddress.slice(0, 6)}...${recipientAddress.slice(-4)}). Here's the transaction setup:`;
-          } else {
-            response.content = `I'll help you send ${amountMatch[1]} Creditcointo ${toMatch[1]}. Here's the transaction setup:`;
-          }
-
-          response.transactionData = {
-            to: recipientAddress,
-            amount: amountMatch[1],
-            message: `Payment via AI Assistant`,
-          };
-          response.suggestions = [
-            "Add a payment message",
-            "Change the amount",
-            "Send to different address",
-          ];
-        } else {
-          response.content =
-            "I need more information to process this payment. Please specify both the amount and recipient address.";
-          response.suggestions = [
-            "Send 10 Creditcointo 0x...",
-            "Transfer 5 Creditcointo alice.sei",
-            "Pay 25 Creditcointo merchant.sei",
-          ];
-        }
-      } else if (
-        lowerMessage.includes("balance") ||
-        lowerMessage.includes("wallet")
-      ) {
-        response.content = `Your wallet balance:\n\nAddress: ${address.slice(0, 6)}...${address.slice(-4)}\nBalance: 125.5 SEI\nPending: 0 SEI\n\nRecent transactions:\n• Received 50 Creditcoinfrom alice.Creditcoin (2 hours ago)\n• Sent 10 Creditcointo merchant.Creditcoin (5 hours ago)\n• Received 85.5 Creditcoinfrom bob.Creditcoin (yesterday)`;
-        response.suggestions = [
-          "Show transaction history",
-          "Check pending transactions",
-          "Export transaction data",
-        ];
-      } else if (
-        lowerMessage.includes("qr") ||
-        lowerMessage.includes("receive")
-      ) {
-        response.content = `I've generated a payment QR code for your wallet address. You can share this with anyone who wants to send you SEI.\n\nWallet Address: ${address}\n\n[QR Code would appear here in production]`;
-        response.suggestions = [
-          "Generate QR with amount",
-          "Create payment request link",
-          "Share via email",
-        ];
-      } else if (
-        lowerMessage.includes("split") ||
-        lowerMessage.includes("divide")
-      ) {
-        const amountMatch = userMessage.match(/(\d+(?:\.\d+)?)\s*sei/i);
-        const splitMatch = userMessage.match(/(?:between|among)\s+(\d+)/i);
-
-        if (amountMatch && splitMatch) {
-          const total = parseFloat(amountMatch[1]);
-          const count = parseInt(splitMatch[1]);
-          const perPerson = (total / count).toFixed(2);
-
-          response.content = `I'll help you split ${total} Creditcoinbetween ${count} recipients. Each person will receive ${perPerson} SEI.\n\nPlease provide the wallet addresses for the ${count} recipients.`;
-          response.suggestions = [
-            `Send ${perPerson} Creditcointo first recipient`,
-            "Use address book",
-            "Create payment group",
-          ];
-        } else {
-          response.content =
-            "To split a payment, please specify the total amount and number of recipients. For example: 'Split 100 Creditcoinbetween 4 people'";
-        }
-      } else if (
-        lowerMessage.includes("schedule") ||
-        lowerMessage.includes("recurring")
-      ) {
-        response.content =
-          "Recurring payments require smart contract deployment. This feature is coming soon!\n\nIn the meantime, you can:\n• Set calendar reminders for regular payments\n• Use batch transactions for multiple payments\n• Save recipient addresses for quick access";
-        response.suggestions = [
-          "Learn about smart contracts",
-          "View saved recipients",
-          "Create batch payment",
-        ];
-      } else if (
-        lowerMessage.includes("status") ||
-        lowerMessage.includes("transaction")
-      ) {
-        response.content =
-          "I'll check the transaction status. Please provide the transaction hash or I can show your recent transactions.\n\nYour last 3 transactions:\n• ✅ 0x1a2b...3c4d - Confirmed (10 blocks ago)\n• ✅ 0x5e6f...7g8h - Confirmed (25 blocks ago)\n• ✅ 0x9i0j...1k2l - Confirmed (1 hour ago)";
-        response.suggestions = [
-          "Check specific transaction",
-          "View on block explorer",
-          "Download receipts",
-        ];
-      } else {
-        response.content = `I understand you want to: "${userMessage}"\n\nWhile I'm still learning, I can help you with:\n• Sending payments\n• Checking balances\n• Generating QR codes\n• Splitting bills\n• Transaction history\n\nWhat would you like to do?`;
-        response.suggestions = EXAMPLE_PROMPTS.slice(3, 6);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "API request failed");
       }
 
-      setMessages((prev) => [...prev, response]);
+      const { output } = await response.json();
+
+      const assistantMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: output,
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
+    } catch (error: any) {
+      console.error("Agent error:", error);
+      toast.error(error.message || "An error occurred.");
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Sorry, I encountered an error. Please try again.",
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
       setIsProcessing(false);
-    }, 1000);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -345,7 +151,7 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
             <div>
               <h2 className="text-xl font-bold">AI Payment Assistant</h2>
               <p className="text-sm text-muted-foreground">
-                Powered by Creditcoin Network
+                Powered by LangChain & Google Gemini
               </p>
             </div>
           </div>
@@ -384,76 +190,49 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center text-gray-500">
+            <p>Ask me to send a payment!</p>
+          </div>
+        )}
         {messages.map((message) => (
           <div
             key={message.id}
             className={cn(
               "flex gap-3",
-              message.role === "user" ? "flex-row-reverse" : "flex-row"
+              message.role === "user" ? "justify-end" : "justify-start"
             )}
           >
             <div
               className={cn(
                 "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
                 message.role === "user"
-                  ? "bg-primary text-white"
-                  : message.role === "assistant"
-                    ? "bg-orange-100 text-primary"
-                    : "bg-gray-100 text-gray-600"
+                  ? "bg-[#333] text-white order-2"
+                  : "bg-orange-100 text-primary order-1"
               )}
             >
               {message.role === "user" ? (
                 <User weight="bold" size={16} />
-              ) : message.role === "assistant" ? (
-                <MagicWand weight="fill" size={16} />
               ) : (
-                <Cpu weight="duotone" size={16} />
+                <MagicWand weight="fill" size={16} />
               )}
             </div>
 
             <div
               className={cn(
-                "flex-1 space-y-2",
-                message.role === "user" ? "items-end" : "items-start"
+                "flex-1 space-y-2 max-w-[80%]",
+                message.role === "user" ? "order-1" : "order-2"
               )}
             >
               <div
                 className={cn(
-                  "rounded-xl px-4 py-3 max-w-[80%] relative group",
+                  "rounded-xl px-4 py-3 relative group w-fit",
                   message.role === "user"
-                    ? "bg-primary text-white ml-auto"
+                    ? "bg-[#333] text-white ml-auto"
                     : "bg-gray-100 text-foreground"
                 )}
               >
                 <p className="whitespace-pre-wrap text-sm">{message.content}</p>
-
-                {message.transactionData && (
-                  <div className="mt-3 p-3 bg-white/10 rounded-lg border border-white/20">
-                    <div className="text-xs font-mono space-y-1">
-                      <div>To: {message.transactionData.to}</div>
-                      <div>Amount: {message.transactionData.amount} SEI</div>
-                      {message.transactionData.message && (
-                        <div>Message: {message.transactionData.message}</div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() =>
-                        executeTransaction(message.transactionData!)
-                      }
-                      disabled={isSending || isConfirming}
-                      className="mt-2 px-3 py-1 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs font-medium transition-colors flex items-center gap-2"
-                    >
-                      {isSending || isConfirming ? (
-                        <>
-                          <CircleNotch size={12} className="animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        "Execute Transaction"
-                      )}
-                    </button>
-                  </div>
-                )}
 
                 {message.role !== "user" && (
                   <button
@@ -475,24 +254,6 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
                     )}
                   </button>
                 )}
-              </div>
-
-              {message.suggestions && message.suggestions.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {message.suggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="px-3 py-1.5 text-xs bg-white border border-border rounded-lg hover:bg-orange-50 hover:border-primary transition-colors"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <div className="text-xs text-muted-foreground">
-                {message.timestamp.toLocaleTimeString()}
               </div>
             </div>
           </div>
@@ -537,7 +298,7 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask me anything about payments..."
+            placeholder="e.g., Send 0.1 tCTC to 0x..."
             className="flex-1 px-4 py-3 rounded-xl border border-border focus:border-primary focus:outline-none resize-none"
             rows={1}
             disabled={isProcessing}
@@ -558,7 +319,7 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
         </div>
 
         {/* Example prompts */}
-        {messages.length === 1 && (
+        {messages.length === 0 && (
           <div className="mt-4">
             <p className="text-xs text-muted-foreground mb-2">Try asking:</p>
             <div className="flex flex-wrap gap-2">

@@ -37,6 +37,7 @@ import {
   generateSecurePassword,
 } from "@/lib/wallet/encryption";
 import { CustodialWalletActions } from "./CustodialWalletActions";
+import { AIAccessSettingsModal } from "./AIAccessSettingsModal";
 
 export function CustodialWalletPanel() {
   const { address } = useAccount();
@@ -62,7 +63,7 @@ export function CustodialWalletPanel() {
   // For testing: use test address if no wallet connected
   const queryAddress = address || "0x0000000000000000000000000000000000000001";
   const userWallets = useQuery(api.wallets.getUserWallets, {
-    userId: queryAddress,
+    userId: queryAddress.toLowerCase(),
   });
   const storeWallet = useMutation(api.wallets.storeWallet);
   const updateAIAccess = useMutation(api.wallets.updateAIAccess);
@@ -381,7 +382,7 @@ export function CustodialWalletPanel() {
                             userId: queryAddress, // Pass the user ID for the wallet
                           })
                         }
-                        className="flex-1 py-2 px-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+                        className="flex-1 py-2 px-3 bg-[#333] text-white rounded-lg hover:bg-[#444] transition-colors flex items-center justify-center gap-2 text-sm font-medium"
                       >
                         <PaperPlaneRight size={16} />
                         Send
@@ -432,7 +433,7 @@ export function CustodialWalletPanel() {
                             <span className="text-muted-foreground">
                               Daily Limit:
                             </span>
-                            <span>{wallet.aiAccess.dailyLimit} SEI</span>
+                            <span>{wallet.aiAccess.dailyLimit} tCTC</span>
                           </div>
                         )}
                       </div>
@@ -577,8 +578,8 @@ export function CustodialWalletPanel() {
                       !passwordValidation.isValid ||
                       password !== confirmPassword ||
                       !walletName
-                      ? "bg-muted text-muted-foreground cursor-not-allowed"
-                      : "bg-primary text-white hover:bg-primary/90"
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-[#333] text-white hover:bg-[#444]"
                   )}
                 >
                   {isCreating ? "Creating Wallet..." : "Create Secure Wallet"}
@@ -632,7 +633,7 @@ export function CustodialWalletPanel() {
                     setGeneratedMnemonic(null);
                     setActiveTab("wallets");
                   }}
-                  className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  className="w-full py-3 bg-[#333] text-white rounded-lg hover:bg-[#444]/90 transition-colors"
                 >
                   I've Saved My Recovery Phrase
                 </button>
@@ -752,8 +753,8 @@ export function CustodialWalletPanel() {
                   password !== confirmPassword ||
                   !privateKeyInput ||
                   !walletName
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-primary text-white hover:bg-primary/90"
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-[#333] text-white hover:bg-[#444]"
               )}
             >
               {isCreating ? "Importing Wallet..." : "Import & Encrypt Wallet"}
@@ -767,6 +768,14 @@ export function CustodialWalletPanel() {
         <CustodialWalletActions
           wallet={actionWallet}
           onClose={() => setActionWallet(null)}
+        />
+      )}
+
+      {/* AI Access Settings Modal */}
+      {selectedWallet && (
+        <AIAccessSettingsModal
+          wallet={{ ...selectedWallet, userId: queryAddress }}
+          onClose={() => setSelectedWallet(null)}
         />
       )}
     </div>
