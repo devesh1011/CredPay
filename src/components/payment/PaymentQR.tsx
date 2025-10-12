@@ -6,7 +6,7 @@ import { Share2, Download, Copy, CheckCircleIcon, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { generatePaymentUrl, copyToClipboard } from "@/lib/utils";
 import { api } from "@/../convex/_generated/api";
-import { useConvex, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 
 interface PaymentQRProps {
   address: string;
