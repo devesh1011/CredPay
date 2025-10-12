@@ -61,7 +61,7 @@ export default function ReceivePage() {
     if (navigator.share) {
       navigator.share({
         title: "CredPay Payment Request",
-        text: `Send me ${amount ? `${amount} SEI` : "a payment"} via CredPay`,
+        text: `Send me ${amount ? `${amount} tCTC` : "a payment"} via CredPay`,
         url: paymentUrl,
       });
     } else {
@@ -115,7 +115,7 @@ export default function ReceivePage() {
                         className="flex-1 px-4 py-3 rounded-xl bg-white border border-border focus:outline-none focus:border-primary transition-colors"
                       />
                       <span className="px-4 py-3 bg-muted rounded-xl font-semibold">
-                        SEI
+                        tCTC
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
