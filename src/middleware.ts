@@ -24,9 +24,24 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Frame-Options", "DENY");
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+
+    const cspHeader = `
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https:;
+      font-src 'self' data:;
+      connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://*.walletconnect.com wss://*.walletconnect.com https://rpc.testnet.creditcoin.network;
+    `;
+
+    // Replace newline characters and extra spaces
+    const contentSecurityPolicyHeaderValue = cspHeader
+      .replace(/\s+/g, " ")
+      .trim();
+
     response.headers.set(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://*.walletconnect.com wss://*.walletconnect.com https://rpc.sei-apis.com;"
+      contentSecurityPolicyHeaderValue
     );
 
     return response;
