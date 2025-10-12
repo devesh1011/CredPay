@@ -221,7 +221,7 @@ export async function unlockWallet(
 
     // Create and return wallet
     return new ethers.Wallet(privateKey);
-  } catch (error) {
+  } catch {
     throw new Error(
       "Failed to unlock wallet: Invalid password or corrupted data "
     );
