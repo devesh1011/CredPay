@@ -11,14 +11,14 @@ interface DashboardContentProps {
   address: string;
 }
 
+type TabId = "agent" | "api" | "profile" | "wallets";
+
 export function DashboardContent({ address }: DashboardContentProps) {
-  const [activeTab, setActiveTab] = useState<
-    "agent" | "api" | "profile" | "wallets"
-  >("agent");
+  const [activeTab, setActiveTab] = useState<TabId>("agent");
 
   const features = [
     {
-      id: "profile",
+      id: "profile" as const,
       icon: UserCircleIcon,
       title: "Profile & Username",
       description: "Manage your unique username",
@@ -26,7 +26,7 @@ export function DashboardContent({ address }: DashboardContentProps) {
       badge: "New",
     },
     {
-      id: "wallets",
+      id: "wallets" as const,
       icon: LockIcon,
       title: "Custodial Wallets",
       description: "AI-controlled secure wallets",
@@ -34,7 +34,7 @@ export function DashboardContent({ address }: DashboardContentProps) {
       badge: "Secure",
     },
     {
-      id: "agent",
+      id: "agent" as const,
       icon: ApertureIcon,
       title: "AI Payment Assistant",
       description: "Chat-based payment assistance",
@@ -63,7 +63,7 @@ export function DashboardContent({ address }: DashboardContentProps) {
           return (
             <button
               key={feature.id}
-              onClick={() => isAvailable && setActiveTab(feature.id as any)}
+              onClick={() => isAvailable && setActiveTab(feature.id)}
               disabled={!isAvailable}
               className={cn(
                 "relative p-6 rounded-xl border-2 transition-all text-left",
