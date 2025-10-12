@@ -59,8 +59,8 @@ export default function PayPage({ params }: PayPageProps) {
                   Complete Your Payment
                 </h1>
                 <p className="text-xl text-muted-foreground">
-                  You've been sent a payment link. Review the details below and
-                  confirm the transaction to send funds.
+                  You`&apos;`ve been sent a payment link. Review the details
+                  below and confirm the transaction to send funds.
                 </p>
               </div>
 
