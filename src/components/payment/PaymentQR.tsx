@@ -104,7 +104,7 @@ export function PaymentQR({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Pay ${recipientName} on Sei`,
+          title: `Pay ${recipientName} on Creditcoin`,
           text: `Send payments to ${recipientName} using CredPay`,
           url: paymentUrl,
         });
@@ -130,7 +130,7 @@ export function PaymentQR({
           </div>
           {amount && (
             <span className="text-sm px-2 py-1 rounded bg-primary/10 text-primary font-medium">
-              {amount} SEI
+              {amount} tCTC
             </span>
           )}
         </div>
