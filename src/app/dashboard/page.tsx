@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 import { Header } from "@/components/layout/Header";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
@@ -10,10 +9,8 @@ import Link from "next/link";
 
 export default function DashboardPage() {
   const { address, isConnected, isConnecting, isReconnecting } = useAccount();
-  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
-  const [useTestWalletIcon, setUseTestWalletIcon] = useState(false);
   const [testModeActive, setTestModeActive] = useState(false);
 
   // Handle client-side mounting to prevent hydration issues
@@ -28,7 +25,6 @@ export default function DashboardPage() {
 
       if (isTestMode) {
         setTestModeActive(true);
-        setUseTestWalletIcon(true);
       }
     }
   }, []);
