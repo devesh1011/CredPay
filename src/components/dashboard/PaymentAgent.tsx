@@ -11,7 +11,6 @@ import {
   ArrowsClockwise,
   Pulse,
   Wallet,
-  Cpu,
   Atom,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
@@ -51,7 +50,7 @@ const CAPABILITIES = [
   },
 ];
 
-export function PaymentAgent({ address }: PaymentAgentProps) {
+export function PaymentAgent({}: PaymentAgentProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -110,9 +109,13 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
         content: output,
       };
       setMessages((prev) => [...prev, assistantMsg]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Agent error:", error);
-      toast.error(error.message || "An error occurred.");
+      if (error instanceof Error) {
+        toast.error(error.message || "An error occurred.");
+      } else {
+        toast.error("An unknown error occurred.");
+      }
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -135,7 +138,10 @@ export function PaymentAgent({ address }: PaymentAgentProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e as any);
+      // Directly call the logic from handleSubmit to avoid unsafe 'any' cast
+      if (!input.trim() || isProcessing) return;
+      processMessage(input);
+      setInput("");
     }
   };
 
