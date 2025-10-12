@@ -2,6 +2,7 @@
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Wallet } from "@phosphor-icons/react";
+import Image from "next/image";
 
 export function WalletButton() {
   return (
@@ -81,10 +82,11 @@ export function WalletButton() {
                         }}
                       >
                         {chain.iconUrl && (
-                          <img
+                          <Image
                             alt={chain.name ?? "Chain icon"}
                             src={chain.iconUrl}
-                            style={{ width: 12, height: 12 }}
+                            width={12}
+                            height={12}
                           />
                         )}
                       </div>
