@@ -9,9 +9,7 @@ import {
   PaperPlaneRightIcon,
   LockIcon,
   LockOpenIcon,
-  WarningIcon,
   CheckCircleIcon,
-  CaretDownIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
@@ -23,8 +21,16 @@ const validateAddress = (address: string): boolean => {
   return /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
+interface ModalWallet {
+  userId: string;
+  walletId: string;
+  fullWalletName?: string;
+  walletName?: string;
+  address: string;
+}
+
 interface CustodialWalletActionsProps {
-  wallet: any;
+  wallet: ModalWallet;
   onClose?: () => void;
 }
 
@@ -98,10 +104,14 @@ export function CustodialWalletActions({
       const balance = await provider.getBalance(ethersWallet.address);
       const balanceInCTC = ethers.formatEther(balance);
       console.log("Wallet balance:", balanceInCTC, "tCTC");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Unlock error:", error);
 
-      if (error.message && error.message.includes("Invalid password")) {
+      if (
+        error instanceof Error &&
+        error.message &&
+        error.message.includes("Invalid password")
+      ) {
         // Record failed attempt
         try {
           const result = await recordFailedUnlock({
@@ -117,11 +127,19 @@ export function CustodialWalletActions({
               `Invalid password. ${result.attemptsRemaining} attempts remaining`
             );
           }
-        } catch (recordError: any) {
-          toast.error(recordError.message || "Invalid password");
+        } catch (recordError: unknown) {
+          if (recordError instanceof Error) {
+            toast.error(recordError.message || "Invalid password");
+          } else {
+            toast.error(
+              "An unknown error occurred while recording the failed attempt."
+            );
+          }
         }
-      } else {
+      } else if (error instanceof Error) {
         toast.error(error.message || "Failed to unlock wallet");
+      } else {
+        toast.error("An unknown error occurred while unlocking the wallet.");
       }
     } finally {
       setIsUnlocking(false);
@@ -230,9 +248,13 @@ export function CustodialWalletActions({
       } else {
         toast.error("Transaction failed");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Transaction error:", error);
-      toast.error(error.message || "Failed to send transaction");
+      if (error instanceof Error) {
+        toast.error(error.message || "Failed to send transaction");
+      } else {
+        toast.error("An unknown error occurred while sending the transaction.");
+      }
     } finally {
       setIsSending(false);
     }
