@@ -1,8 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import Lottie from 'lottie-react';
-import worldMapAnimation from '../../../public/Worldmap.json';
+import Lottie from "lottie-react";
+import worldMapAnimation from "../../../public/Worldmap.json";
 
 export function WorldMapAnimation() {
   return (
@@ -11,7 +10,7 @@ export function WorldMapAnimation() {
         animationData={worldMapAnimation}
         loop={true}
         autoplay={true}
-        style={{ width: '100%', height: 'auto' }}
+        style={{ width: "100%", height: "auto" }}
       />
     </div>
   );
