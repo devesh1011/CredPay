@@ -84,8 +84,12 @@ export function UsernameManager() {
         setNewUsername("");
         setValidationMessage("");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to change username");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || "Failed to change username");
+      } else {
+        toast.error("An unknown error occurred while changing username.");
+      }
     }
   };
 
