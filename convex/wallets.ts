@@ -240,7 +240,7 @@ export const updateAIAccess = mutation({
   handler: async (ctx, args) => {
     const wallet = await ctx.db
       .query("custodialWallets")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", args.userId.toLowerCase()))
       .filter((q) => q.eq(q.field("walletId"), args.walletId))
       .first();
 
