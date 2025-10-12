@@ -6,14 +6,7 @@ import Image from "next/image";
 import { useAccount } from "wagmi";
 import { WalletButton } from "@/components/wallet/WalletButton";
 import { TestWalletToggle } from "@/components/wallet/TestWalletToggle";
-import {
-  List,
-  X,
-  PaperPlaneTilt,
-  QrCode,
-  Info,
-  Gauge,
-} from "@phosphor-icons/react";
+import { List, X, PaperPlaneTilt, QrCode, Gauge } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -89,6 +82,7 @@ export function Header() {
                         : "text-muted-foreground hover:text-white hover:bg-[#333]"
                     )}
                   >
+                    <Icon weight="regular" size={16} />
                     {link.label}
                   </Link>
                 );
