@@ -8,8 +8,21 @@ import { X, FloppyDisk, CircleNotch } from "@phosphor-icons/react";
 import { AccessLevel } from "@/lib/wallet/custodial";
 import { cn } from "@/lib/utils";
 
+// Simplified wallet interface - only what's needed for AI access settings
+interface ModalWallet {
+  userId: string;
+  walletId: string;
+  fullWalletName?: string;
+  label?: string;
+  aiAccess: {
+    enabled: boolean;
+    level: AccessLevel;
+    dailyLimit?: number;
+  };
+}
+
 interface AIAccessSettingsModalProps {
-  wallet: any;
+  wallet: ModalWallet;
   onClose: () => void;
 }
 
@@ -20,7 +33,7 @@ export function AIAccessSettingsModal({
   const [enabled, setEnabled] = useState(wallet.aiAccess.enabled);
   const [level, setLevel] = useState(wallet.aiAccess.level);
   const [dailyLimit, setDailyLimit] = useState(
-    wallet.aiAccess.dailyLimit || ""
+    wallet.aiAccess.dailyLimit?.toString() || ""
   );
   const [isSaving, setIsSaving] = useState(false);
 
@@ -38,8 +51,12 @@ export function AIAccessSettingsModal({
       });
       toast.success("AI access settings updated successfully!");
       onClose();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update settings");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || "Failed to update settings");
+      } else {
+        toast.error("An unknown error occurred while updating settings.");
+      }
     } finally {
       setIsSaving(false);
     }
