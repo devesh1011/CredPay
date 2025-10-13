@@ -146,7 +146,7 @@ export function PaymentAgent({}: PaymentAgentProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       {/* Header */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between mb-4">
@@ -196,6 +196,23 @@ export function PaymentAgent({}: PaymentAgentProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {/* Coming Soon Overlay */}
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="text-center space-y-4 px-6">
+            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center shadow-lg">
+              <MagicWand weight="fill" size={40} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold mb-2">Coming Soon</h3>
+              <p className="text-muted-foreground max-w-md">
+                The AI Payment Assistant is currently under development. Stay
+                tuned for autonomous payment capabilities powered by LangChain &
+                Google Gemini!
+              </p>
+            </div>
+          </div>
+        </div>
+
         {messages.length === 0 && (
           <div className="text-center text-gray-500">
             <p>Ask me to send a payment!</p>

@@ -21,9 +21,12 @@ export const metadata: Metadata = {
     description: "The easy way to send and receive payments on Creditcoin.",
   },
   icons: {
-    icon: "/credpay.png",
+    icon: [
+      { url: "/credpay.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
     shortcut: "/credpay.png",
-    apple: "/credpay.png",
+    apple: [{ url: "/credpay.png", sizes: "180x180", type: "image/png" }],
     other: {
       rel: "apple-touch-icon-precomposed",
       url: "/credpay.png",
