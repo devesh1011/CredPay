@@ -87,10 +87,11 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ output: response.output });
   } catch (error) {
+    console.error("Agent API Error:", error);
     return NextResponse.json(
       {
         error: "An error occurred while processing the request.",
-        details: error,
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
